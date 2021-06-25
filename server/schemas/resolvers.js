@@ -1,3 +1,5 @@
+const { AuthenticationError } = require('apollo-server-express');
+
 const { User } = require('../models');
 
 const resolvers = {
@@ -13,8 +15,18 @@ const resolvers = {
             
             return user;
         },
-        login: async () => {
+        login: async (_, { email, password}) => {
+            const user = await User.findOne({ email });
 
+            if(!user) {
+                throw new AuthenticationError('Incorrect credentials');
+            }
+
+            const correctPw = await user.isCorrectPassword(password);
+            if(!correctPw) {
+                throw new AuthenticationError('Incorrect credentials');
+            }
+            return user;
         }
     }
 };
