@@ -20,7 +20,7 @@ const resolvers = {
 
             return { token, user };
         },
-        login: async (_, { email, password}) => {
+        login: async (_, { email, password }) => {
             const user = await User.findOne({ email });
 
             if(!user) {
@@ -33,6 +33,21 @@ const resolvers = {
             }
             const token = signToken(user);
             return { token, user };
+        },
+        saveBook: async(_, args, context) => {
+            if(context.user){
+                try {
+                    const updatedUser = await User.findOneAndUpdate(
+                      { _id: context.user._id },
+                      { $addToSet: { savedBooks: args } },
+                      { new: true, runValidators: true }
+                    );
+                    return updatedUser;
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+            throw new AuthenticationError('Not logged in')
         }
     }
 };
