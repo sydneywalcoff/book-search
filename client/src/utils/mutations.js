@@ -28,6 +28,7 @@ export const SAVE_BOOK = gql`
         saveBook(authors: $authors, description:$description, title:$title, bookId:$bookId, image:$image, link:$link) {
             username
             savedBooks {
+                bookId
                 title
             }
         }
