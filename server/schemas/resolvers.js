@@ -35,6 +35,7 @@ const resolvers = {
             return { token, user };
         },
         saveBook: async(_, args, context) => {
+            console.log(context.user)
             if(context.user){
                 try {
                     const updatedUser = await User.findOneAndUpdate(
@@ -59,7 +60,7 @@ const resolvers = {
                     )
                     return updatedUser;
                 } catch (err) {
-                    console.log(err);
+                    console.log('removeBook', err);
                 }
             }
             throw new AuthenticationError('Not logged in');
