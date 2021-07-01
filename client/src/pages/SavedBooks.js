@@ -9,9 +9,22 @@ import { REMOVE_BOOK } from '../utils/mutations';
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
   const { loading, data: meData } = useQuery(GET_ME);
-  const [deleteBook] = useMutation(REMOVE_BOOK);
+  const [deleteBook] = useMutation(REMOVE_BOOK, {
+    update(cache, { data: { deletedBook } }) {
+      try {
+        const { savedBooks } = cache.readQuery({ query: GET_ME })
+        cache.writeQuery({
+          query: GET_ME,
+          data: { savedBooks: [...savedBooks] }
+        });
+      } catch (e) {
+        console.log(e);
+      }
+
+    }
+  });
   const user = meData?.me;
-  // const userDataLength = user.savedBooks.length;
+  const userDataLength = userData?.savedBooks?.length;
   
   useEffect(() => {
     const getUserData = async user => {
@@ -27,17 +40,12 @@ const SavedBooks = () => {
         console.log(e)
       }
     };
-    
     getUserData(user);
-  });
-  console.log(userData)
+  }, [user, userDataLength, loading]);
 
   if (loading) {
     return <h2>LOADING...</h2>;
   }
-
-  // if(!loading){
-  // }
 
   // use this to determine if `useEffect()` hook needs to run again
 
@@ -54,37 +62,11 @@ const SavedBooks = () => {
         variables: { bookId: bookId }
       });
       setUserData(updatedUser)
-
+      removeBookId(bookId);
     } catch(e) {
       console.log(e)
     }
-    console.log(user)
   };
-  
-
-  // create function that accepts the book's mongo _id value as param and deletes the book from the database
-  // const handleDeleteBook = async (bookId) => {
-  //   const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-  //   if (!token) {
-  //     return false;
-  //   }
-
-  //   try {
-  //     const response = await deleteBook(bookId, token);
-
-  //     if (!response.ok) {
-  //       throw new Error('something went wrong!');
-  //     }
-
-  //     const updatedUser = await response.json();
-  //     setUserData(updatedUser);
-  //     upon success, remove book's id from localStorage
-  //     removeBookId(bookId);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-
 
   return (
     <>
@@ -95,12 +77,12 @@ const SavedBooks = () => {
       </Jumbotron>
       <Container>
         <h2>
-          {userData?.savedBooks.length
+          {userData?.savedBooks?.length
             ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
             : 'You have no saved books!'}
         </h2>
         <CardColumns>
-          {userData?.savedBooks.map((book) => {
+          {userData?.savedBooks?.map((book) => {
             return (
               <Card key={book.bookId} border='dark'>
                 {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
