@@ -23,8 +23,6 @@ module.exports = {
         .trim();
     }
 
-    console.log(token)
-
     // if no token, return request object as is
     if (!token) {
       return req;
