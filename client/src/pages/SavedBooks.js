@@ -9,7 +9,16 @@ import { REMOVE_BOOK } from '../utils/mutations';
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
   const { loading, data } = useQuery(GET_ME);
-  const [deleteBook] = useMutation(REMOVE_BOOK);
+  const [deleteBook] = useMutation(REMOVE_BOOK, {
+    update(cache, { data: { deleteBook } }) {
+      const { savedBooks } = cache.readQuery({ query: GET_ME });
+
+      cache.writeQuery({
+        query: GET_ME,
+        data: { savedBooks: [deleteBook, ...savedBooks]}
+      })
+    }
+  });
   
   const getUserData = async () => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
