@@ -10,13 +10,13 @@ const SavedBooks = () => {
   const [userData, setUserData] = useState({});
   const { loading, data } = useQuery(GET_ME);
   const [deleteBook] = useMutation(REMOVE_BOOK, {
-    update(cache, { data: { deleteBook } }) {
-      console.log(cache)
+    update(cache, { data: { removeBook } }) {
+      console.log(removeBook)
       try {
         const { savedBooks } = cache.readQuery({ query: GET_ME });
         cache.writeQuery({
           query: GET_ME,
-          data: { savedBooks: [deleteBook, ...savedBooks]}
+          data: { ...data }
         });
       } catch (e) {
         console.log(e);
@@ -24,7 +24,7 @@ const SavedBooks = () => {
       const { me } = cache.readQuery({ query: GET_ME });
       cache.writeQuery({
         query: GET_ME,
-        data: { me: { ...me, savedBooks: [deleteBook, ...me.savedBooks] } }
+        data: { me: { ...me, savedBooks: [removeBook, ...me.savedBooks] } }
       })
     }
   });
@@ -38,7 +38,7 @@ const SavedBooks = () => {
       const meData = await data?.me;
       if(meData){
         setUserData(meData);
-        console.log(userData)
+        // console.log(userData)
       }
     } catch (e) {
       console.log(e)
