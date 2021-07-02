@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 import { GET_ME } from '../utils/queries';
 import { useQuery, useMutation } from '@apollo/client';
@@ -8,46 +8,29 @@ import { REMOVE_BOOK } from '../utils/mutations';
 
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
-  const { loading, data: meData } = useQuery(GET_ME);
-  const [deleteBook] = useMutation(REMOVE_BOOK, {
-    update(cache, { data: { deletedBook } }) {
-      try {
-        const { savedBooks } = cache.readQuery({ query: GET_ME })
-        cache.writeQuery({
-          query: GET_ME,
-          data: { savedBooks: [...savedBooks] }
-        });
-      } catch (e) {
-        console.log(e);
-      }
-
-    }
-  });
-  const user = meData?.me;
-  const userDataLength = userData?.savedBooks?.length;
+  const { loading, data } = useQuery(GET_ME);
+  const [deleteBook] = useMutation(REMOVE_BOOK);
   
-  useEffect(() => {
-    const getUserData = async user => {
-      const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-      if (!token) {
-        return false;
+  const getUserData = async () => {
+    const token = Auth.loggedIn() ? Auth.getToken() : null;
+    if (!token) {
+      return false;
+    }
+    try {
+      const meData = await data.me;
+      if(meData){
+        setUserData(meData);
+        console.log(userData)
       }
-      try {
-        const userData = await user;
-        setUserData(userData);
-      } catch (e) {
-        console.log(e)
-      }
-    };
-    getUserData(user);
-  }, [user, userDataLength, loading]);
-
+    } catch (e) {
+      console.log(e)
+    }
+  };
+  getUserData();
+  
   if (loading) {
     return <h2>LOADING...</h2>;
   }
-
-  // use this to determine if `useEffect()` hook needs to run again
 
   
   const removeBook = async (bookId) => {
@@ -58,9 +41,10 @@ const SavedBooks = () => {
     }
 
     try {
-      const updatedUser = await deleteBook({
+      const { data } = await deleteBook({
         variables: { bookId: bookId }
       });
+      const updatedUser = data.removeBook
       setUserData(updatedUser)
       removeBookId(bookId);
     } catch(e) {
