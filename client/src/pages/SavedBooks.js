@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 import { GET_ME } from '../utils/queries';
+import { REMOVE_BOOK } from '../utils/mutations';
 import { useQuery, useMutation } from '@apollo/client';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
-import { REMOVE_BOOK } from '../utils/mutations';
 
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
@@ -29,7 +29,6 @@ const SavedBooks = () => {
       const meData = await data?.me;
       if(meData){
         setUserData(meData);
-        // console.log(userData)
       }
     } catch (e) {
       console.log(e)
